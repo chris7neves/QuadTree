@@ -16,14 +16,12 @@ class Rectangle:
         self.point = point
         self.w = w
         self.h = h
-        self.east, self.west = point.x + (w/2), point.x - (w/2)
-        self.north, self.south = point.y + (h/2), point.y - (h/2)
-        self.center_x = point.x
-        self.center_y = point.y
-
-    def contains(self, point):
-        """ Checks to see if a point is within the rectangle's bounds."""
-        return self.east >= point.x > self.west and self.north >= point.y > self.south
+        self.east = self.point.x + (w/2)
+        self.west = self.point.x - (w/2)
+        self.north = self.point.y - (h/2) # CHANGE BACK TO + AFTer
+        self.south = self.point.y + (h/2) # He seems to always flip the axes. This is done to match his code. Intuitively, i would do the opposite
+        self.center_x = self.point.x
+        self.center_y = self.point.y
 
     def intersects(self, rect):
         """ Checks for conditions that when true, mean that 2 rectangles don't overlap."""
@@ -39,13 +37,12 @@ class Rectangle:
         except AttributeError:
             x, y = point
 
-        return self.west <= x <= self.east and self.north >= y >= self.south
+        return self.west <= x < self.east and self.north <= y < self.south # CHANGE THIS BACK TO PROPER COMPARISON SIGNS AFTER
 
     def draw(self, ax, linewidth=1, color='k'):
         l_x, l_y = self.west, self.north
         r_x, r_y = self.east, self.south
-        ax.plot([l_x, r_x, r_x, l_x], [l_y, l_y, r_y, r_y], linewidth=linewidth, color=color)
-
+        ax.plot([l_x, r_x, r_x, l_x, l_x], [l_y, l_y, r_y, r_y, l_y], linewidth=linewidth, color=color)
 
 
 class Quadtree:
@@ -55,28 +52,53 @@ class Quadtree:
         self.points = []
         self.node_depth = depth
         self.divided = False
-        self.ne, self. nw, self.sw, self.se = None
+        self.ne = None
+        self.nw = None
+        self.sw = None
+        self.se = None
 
-    def split(self):
+    def __len__(self):
+        """ Returns the number of points in the quadtree."""
+        num_points = len(self.points)
+        if self.divided:
+            num_points += (len(self.nw) + len(self.ne) + len(self.se) + len(self.sw))
+        return num_points
+
+    def split(self): # differs from code. Check for mistakes if errors pop up
         center_x, center_y = self.boundary.center_x, self.boundary.center_y # The center of a provided boundary
-        w, h = self.boundary.w/2, self.boundary.h/2 # The width and height of a quadrant of a provided boundary
+        w, h = self.boundary.w/2, self.boundary.h/2 # The width and height of a new quadrant in a provided boundary
 
-        ne_rect = Rectangle(Point(center_x + w/2, center_y + h/2), h, w)
+        ne_rect = Rectangle(Point(center_x + w/2, center_y - h/2), h, w) #CHANGE BACK AFTER
         self.ne = Quadtree(ne_rect, self.point_limit, self.node_depth + 1)
 
-        nw_rect = Rectangle(Point(center_x - w/2, center_y + w/2), h, w)
+        nw_rect = Rectangle(Point(center_x - w/2, center_y - h/2), h, w)
         self.nw = Quadtree(nw_rect, self.point_limit, self.node_depth + 1)
 
-        sw_rect = Rectangle(Point(center_x - w/2, center_y - w/2), h, w)
+        sw_rect = Rectangle(Point(center_x - w/2, center_y + h/2), h, w)
         self.sw = Quadtree(sw_rect, self.point_limit, self.node_depth + 1)
 
-        se_rect = Rectangle(Point(center_x + w/2, center_y - w/2), h, w)
+        se_rect = Rectangle(Point(center_x + w/2, center_y + h/2), h, w)
         self.se = Quadtree(se_rect, self.point_limit, self.node_depth + 1)
 
         self.divided = True
 
     def insert(self, point):
+        # if len(self.points) >= 4:
+        #     print(len(self.points))
+        if not self.boundary.contains(point):
+            return False
 
+        if len(self.points) < self.point_limit:
+            #print(f"adding point to quad with {len(self.points)}")
+            self.points.append(point)
+            return True
+
+        if not self.divided:
+            self.split()
+
+        # evaluates these in order that they appear
+        return (self.ne.insert(point) or self.nw.insert(point)
+                or self.se.insert(point) or self.sw.insert(point))
 
     def draw(self, ax, linewidth=1, color='k'):
         self.boundary.draw(ax, linewidth, color)
