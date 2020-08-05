@@ -10,6 +10,8 @@ class Point:
         self.content = content
 
 
+
+
 class Rectangle:
     def __init__(self, point, h, w):
         """ Point is the center of the rectangle."""

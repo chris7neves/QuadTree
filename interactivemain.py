@@ -32,17 +32,19 @@ point_coords = np.concatenate((np.expand_dims(x_values, axis=1), np.expand_dims(
 
 point_list = [Point(x, y) for x, y in point_coords]
 
-ax.scatter(x_values, y_values, c='b', s=1)
+
 
 point_limit = 1
 quadtree2 = QuadTree(Node(350, 350, 700, 700), point_limit)
 for point in point_list:
+    ax.scatter(point.x, point.y, c='b', s=3)
     quadtree2.insert(point)
+    quadtree2.draw(ax, linewidth=0.5)
+    plt.pause(1.0)
 
 
 
-
-quadtree2.draw(ax, linewidth=0.5)
+# quadtree2.draw(ax, linewidth=0.5)
 
 # cid = fig.canvas.mpl_connect('button_press_event', onclick)
 
