@@ -83,13 +83,12 @@ class Quadtree:
         self.divided = True
 
     def insert(self, point):
-        # if len(self.points) >= 4:
-        #     print(len(self.points))
+
         if not self.boundary.contains(point):
             return False
 
         if len(self.points) < self.point_limit:
-            #print(f"adding point to quad with {len(self.points)}")
+            print(f"adding point to quad with {len(self.points)}")
             self.points.append(point)
             return True
 
@@ -101,7 +100,8 @@ class Quadtree:
                 or self.se.insert(point) or self.sw.insert(point))
 
     def draw(self, ax, linewidth=1, color='k'):
-        self.boundary.draw(ax, linewidth, color)
+        if self.boundary:
+            self.boundary.draw(ax, linewidth, color)
         if self.divided:
             self.ne.draw(ax, linewidth, color)
             self.nw.draw(ax, linewidth, color)

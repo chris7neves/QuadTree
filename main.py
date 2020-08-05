@@ -13,7 +13,7 @@ points = [Point(*coord) for coord in coords]
 print(len(points))
 center = Point(width/2, height/2)
 domain = Rectangle(center, height, width)
-qtree = Quadtree(domain, 3)
+qtree = Quadtree(domain, 5)
 for point in points:
     qtree.insert(point)
 
