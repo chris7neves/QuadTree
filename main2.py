@@ -17,12 +17,12 @@ ax = fig.add_subplot(111)
 
 
 # Concentrated points
-# x_values = np.random.randint(340, 350, 20)
-# y_values = np.random.randint(340, 350, 20)
+x_values = np.random.randint(340, 350, 20)
+y_values = np.random.randint(340, 350, 20)
 
 # Distributed
-x_values = np.random.randint(0, 700, 200)
-y_values = np.random.randint(0, 700, 200)
+# x_values = np.random.randint(0, 700, 200)
+# y_values = np.random.randint(0, 700, 200)
 
 # Single points
 # x_values = [0, 5, 350]

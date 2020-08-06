@@ -24,10 +24,10 @@ class Node: # Essentially the bounding area the quadtree will be built inside of
 
     # contains method
     def contains(self, point):
-        return self.west <= point.x < self.east+(0.001*self.east) and self.south <= point.y < self.north+(0.001*self.north)
+        return self.west <= point.x < self.east and self.south <= point.y < self.north
 
     def draw(self, ax, color, linewidth):
-        #ax.scatter(self.cx, self.cy, c='r', s=3)
+        ax.scatter(self.cx, self.cy, c='r', s=3)
         ax.plot([self.west, self.east, self.east, self.west, self.west],
                 [self.north, self.north, self.south, self.south, self.north], c=color, linewidth=linewidth)
 
@@ -39,6 +39,10 @@ class QuadTree: # The tree. The node passed to it is the root node, and it has 4
         self.points = []
         self.is_divided = False
         self.depth = depth
+        self.ne = None
+        self.nw = None
+        self.sw = None
+        self.se = None
 
     def split(self):
         if self.is_divided:
@@ -63,11 +67,17 @@ class QuadTree: # The tree. The node passed to it is the root node, and it has 4
 
         self.is_divided = True
 
-       # self.reorganize()
+        # self.reorganize1()
+        # for point in self.points:
+        #     self.reorganize(point)
+        # self.points.clear()
+        temp = self.points.copy()
+        self.points.clear()
+        for point in temp:
+            self.insert(point)
+        temp.clear()
 
-
-
-    def reorganize(self):
+    def reorganize1(self):
         for point in self.points:
             if self.ne.rootnode.contains(point):
                 self.ne.points.append(point)
@@ -79,12 +89,17 @@ class QuadTree: # The tree. The node passed to it is the root node, and it has 4
                 self.se.points.append(point)
         self.points.clear()
 
+    def reorganize(self, point):
+        return self.ne.insert(point) or self.nw.insert(point) or self.sw.insert(point) or self.se.insert(point)
 
     def insert(self, point):
 
         # Checks if the point is contained in the quadrant. Ignored for root
-        if self.depth > 0 and not self.rootnode.contains(point):
+        if not self.rootnode.contains(point):
             return False
+
+        if self.is_divided: # THIS WAS THE MISSING LINE AHHHHHHH FINALLY... still causes recursion issues when max p is 1 though
+            return self.ne.insert(point) or self.nw.insert(point) or self.sw.insert(point) or self.se.insert(point)
 
         # Base case (insert point)
         if len(self.points) < self.max_p:
